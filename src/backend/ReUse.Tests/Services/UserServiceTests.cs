@@ -1,6 +1,9 @@
 using AutoMapper;
+
 using Microsoft.AspNetCore.Http;
+
 using Moq;
+
 using ReUse.Application.DTOs.Users.UserProfile;
 using ReUse.Application.Enums;
 using ReUse.Application.Interfaces;
@@ -15,19 +18,19 @@ namespace ReUse.Tests.Services;
 public class UserServiceTests
 {
     // ── Mocks ────────────────────────────────────────────────────────────────
-    private readonly Mock<IUnitOfWork>        _unitOfWork;
-    private readonly Mock<IUserRepository>    _userRepo;
-    private readonly Mock<IImageValidator>    _imageValidator;
+    private readonly Mock<IUnitOfWork> _unitOfWork;
+    private readonly Mock<IUserRepository> _userRepo;
+    private readonly Mock<IImageValidator> _imageValidator;
     private readonly Mock<ICloudinaryService> _cloudinary;
-    private readonly IMapper                  _mapper;
-    private readonly UserService              _sut;
+    private readonly IMapper _mapper;
+    private readonly UserService _sut;
 
     public UserServiceTests()
     {
-        _unitOfWork     = new Mock<IUnitOfWork>();
-        _userRepo       = new Mock<IUserRepository>();
+        _unitOfWork = new Mock<IUnitOfWork>();
+        _userRepo = new Mock<IUserRepository>();
         _imageValidator = new Mock<IImageValidator>();
-        _cloudinary     = new Mock<ICloudinaryService>();
+        _cloudinary = new Mock<ICloudinaryService>();
 
         // Wire UnitOfWork.User to our mocked repository
         _unitOfWork.Setup(u => u.User).Returns(_userRepo.Object);
@@ -49,26 +52,26 @@ public class UserServiceTests
 
     // ── Shared factory ───────────────────────────────────────────────────────
     private static User CreateUser(
-        Guid?   id              = null,
-        string  fullName        = "Ahmed Mordi",
-        string  email           = "ahmed@example.com",
+        Guid? id = null,
+        string fullName = "Ahmed Mordi",
+        string email = "ahmed@example.com",
         string? profileImageUrl = null,
         string? profilePublicId = null,
-        string? coverImageUrl   = null,
-        string? coverPublicId   = null,
-        int     followersCount  = 0,
-        int     followingCount  = 0)
+        string? coverImageUrl = null,
+        string? coverPublicId = null,
+        int followersCount = 0,
+        int followingCount = 0)
     {
         var user = new User
         {
-            Id                   = id ?? Guid.NewGuid(),
-            IdentityUserId       = Guid.NewGuid().ToString(),
-            FullName             = fullName,
-            Email                = email,
-            ProfileImageUrl      = profileImageUrl,
+            Id = id ?? Guid.NewGuid(),
+            IdentityUserId = Guid.NewGuid().ToString(),
+            FullName = fullName,
+            Email = email,
+            ProfileImageUrl = profileImageUrl,
             ProfileImagePublicId = profilePublicId,
-            CoverImageUrl        = coverImageUrl,
-            CoverImagePublicId   = coverPublicId,
+            CoverImageUrl = coverImageUrl,
+            CoverImagePublicId = coverPublicId,
         };
 
         for (int i = 0; i < followersCount; i++) user.Followers.Add(new Follow());
@@ -104,13 +107,13 @@ public class UserServiceTests
     public async Task GetUserProfileAsync_ReturnsCorrectDto_WhenUserExists()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId, fullName: "Ahmed Mordi",
+        var user = CreateUser(id: userId, fullName: "Ahmed Mordi",
                                 email: "ahmed@example.com",
                                 followersCount: 5, followingCount: 3);
-        user.Bio           = "Engineer";
-        user.City          = "Cairo";
+        user.Bio = "Engineer";
+        user.City = "Cairo";
         user.RatingsAverage = 4.5m;
-        user.RatingsCount   = 10;
+        user.RatingsCount = 10;
 
         _userRepo
             .Setup(r => r.GetProfileByIdAsync(It.Is<Guid>(id => id == userId)))
@@ -119,15 +122,15 @@ public class UserServiceTests
         var result = await _sut.GetUserProfileAsync(userId);
 
         Assert.NotNull(result);
-        Assert.Equal(userId,          result.Id);
-        Assert.Equal("Ahmed Mordi",   result.FullName);
+        Assert.Equal(userId, result.Id);
+        Assert.Equal("Ahmed Mordi", result.FullName);
         Assert.Equal("ahmed@example.com", result.Email);
-        Assert.Equal("Engineer",      result.Bio);
-        Assert.Equal("Cairo",         result.City);
-        Assert.Equal(5,               result.FollowersCount);
-        Assert.Equal(3,               result.FollowingCount);
-        Assert.Equal(4.5m,            result.RatingsAverage);
-        Assert.Equal(10,              result.RatingsCount);
+        Assert.Equal("Engineer", result.Bio);
+        Assert.Equal("Cairo", result.City);
+        Assert.Equal(5, result.FollowersCount);
+        Assert.Equal(3, result.FollowingCount);
+        Assert.Equal(4.5m, result.RatingsAverage);
+        Assert.Equal(10, result.RatingsCount);
 
         _userRepo.Verify(r => r.GetProfileByIdAsync(userId), Times.Once);
     }
@@ -137,7 +140,7 @@ public class UserServiceTests
     public async Task GetUserProfileAsync_ReturnZeroCounts_WhenNoFollowersOrFollowing()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId, followersCount: 0, followingCount: 0);
+        var user = CreateUser(id: userId, followersCount: 0, followingCount: 0);
 
         _userRepo.Setup(r => r.GetProfileByIdAsync(userId)).ReturnsAsync(user);
 
@@ -152,7 +155,7 @@ public class UserServiceTests
     public async Task GetUserProfileAsync_ReturnsNullForOptionalFields_WhenNotSet()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId);
+        var user = CreateUser(id: userId);
         // Bio, City, ProfileImageUrl etc. are all null on the factory default
 
         _userRepo.Setup(r => r.GetProfileByIdAsync(userId)).ReturnsAsync(user);
@@ -172,7 +175,7 @@ public class UserServiceTests
     public async Task GetUserProfileAsync_ForwardsExactUserId_ToRepository()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId);
+        var user = CreateUser(id: userId);
 
         _userRepo.Setup(r => r.GetProfileByIdAsync(userId)).ReturnsAsync(user);
 
@@ -205,7 +208,7 @@ public class UserServiceTests
     public async Task UpdateUserProfileAsync_AppliesProvidedFields_ToEntity()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId, fullName: "Old Name");
+        var user = CreateUser(id: userId, fullName: "Old Name");
 
         _userRepo.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync(user);
         _unitOfWork.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
@@ -213,15 +216,15 @@ public class UserServiceTests
         var request = new UpdateUserProfileRequest
         {
             FullName = "Ahmed Mordi",
-            Bio      = "Engineer",
-            City     = "Cairo"
+            Bio = "Engineer",
+            City = "Cairo"
         };
 
         await _sut.UpdateUserProfileAsync(userId, request);
 
         Assert.Equal("Ahmed Mordi", user.FullName);
-        Assert.Equal("Engineer",    user.Bio);
-        Assert.Equal("Cairo",       user.City);
+        Assert.Equal("Engineer", user.Bio);
+        Assert.Equal("Cairo", user.City);
 
         _userRepo.Verify(r => r.Update(user), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(), Times.Once);
@@ -233,10 +236,10 @@ public class UserServiceTests
     public async Task UpdateUserProfileAsync_DoesNotOverwrite_WhenRequestFieldIsNull()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId, fullName: "Existing Name");
-        user.City        = "Cairo";
+        var user = CreateUser(id: userId, fullName: "Existing Name");
+        user.City = "Cairo";
         user.PhoneNumber = "+201001234567";
-        user.Bio         = "Existing bio";
+        user.Bio = "Existing bio";
 
         _userRepo.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync(user);
         _unitOfWork.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
@@ -246,11 +249,11 @@ public class UserServiceTests
 
         await _sut.UpdateUserProfileAsync(userId, request);
 
-        Assert.Equal("Existing Name",    user.FullName);
-        Assert.Equal("Cairo",            user.City);
-        Assert.Equal("+201001234567",    user.PhoneNumber);
-        Assert.Equal("Existing bio",     user.Bio);
-        Assert.Equal("Egypt",            user.Country);  // only this changed
+        Assert.Equal("Existing Name", user.FullName);
+        Assert.Equal("Cairo", user.City);
+        Assert.Equal("+201001234567", user.PhoneNumber);
+        Assert.Equal("Existing bio", user.Bio);
+        Assert.Equal("Egypt", user.Country);  // only this changed
     }
 
     // EDGE CASE — fully empty request (all nulls) — nothing changes, but
@@ -259,7 +262,7 @@ public class UserServiceTests
     public async Task UpdateUserProfileAsync_StillPersists_WhenRequestIsAllNull()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId, fullName: "Ahmed Mordi");
+        var user = CreateUser(id: userId, fullName: "Ahmed Mordi");
 
         _userRepo.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync(user);
         _unitOfWork.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
@@ -295,7 +298,7 @@ public class UserServiceTests
     [Fact]
     public async Task UpdateImageProfileAsync_UpdatesProfileImage_AndDeletesOldOne()
     {
-        var userId      = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var oldPublicId = "old_profile_abc";
         var user = CreateUser(id: userId,
                               profileImageUrl: "https://old.com/img.jpg",
@@ -312,7 +315,7 @@ public class UserServiceTests
             ProfileImageOptions.Profile);
 
         Assert.Equal("https://new.com/img.jpg", user.ProfileImageUrl);
-        Assert.Equal("new_profile_xyz",          user.ProfileImagePublicId);
+        Assert.Equal("new_profile_xyz", user.ProfileImagePublicId);
 
         // Save happens BEFORE delete (service order: Update → Save → Delete)
         _unitOfWork.Verify(u => u.SaveChangesAsync(), Times.Once);
@@ -323,7 +326,7 @@ public class UserServiceTests
     [Fact]
     public async Task UpdateImageProfileAsync_UpdatesCoverImage_AndDeletesOldOne()
     {
-        var userId      = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var oldPublicId = "old_cover_abc";
         var user = CreateUser(id: userId,
                               coverImageUrl: "https://old.com/cover.jpg",
@@ -340,7 +343,7 @@ public class UserServiceTests
             ProfileImageOptions.Cover);
 
         Assert.Equal("https://new.com/cover.jpg", user.CoverImageUrl);
-        Assert.Equal("new_cover_xyz",              user.CoverImagePublicId);
+        Assert.Equal("new_cover_xyz", user.CoverImagePublicId);
         _cloudinary.Verify(c => c.DeleteAsync(oldPublicId), Times.Once);
     }
 
@@ -349,7 +352,7 @@ public class UserServiceTests
     public async Task UpdateImageProfileAsync_DoesNotCallDelete_WhenNoOldImageExists()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId); // profilePublicId is null
+        var user = CreateUser(id: userId); // profilePublicId is null
 
         _userRepo.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync(user);
         _unitOfWork.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
@@ -369,7 +372,7 @@ public class UserServiceTests
     public async Task UpdateImageProfileAsync_DoesNotCallDelete_WhenOldPublicIdIsWhitespace()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId,
+        var user = CreateUser(id: userId,
                                 profileImageUrl: "https://old.com/img.jpg",
                                 profilePublicId: "   "); // whitespace only
 
@@ -392,7 +395,7 @@ public class UserServiceTests
     public async Task UpdateImageProfileAsync_BuildsCorrectFolderPath_ForProfileImage()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId);
+        var user = CreateUser(id: userId);
         string? capturedFolder = null;
 
         _userRepo.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync(user);
@@ -413,7 +416,7 @@ public class UserServiceTests
     public async Task UpdateImageProfileAsync_BuildsCorrectFolderPath_ForCoverImage()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId);
+        var user = CreateUser(id: userId);
         string? capturedFolder = null;
 
         _userRepo.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync(user);
@@ -457,7 +460,7 @@ public class UserServiceTests
     public async Task UpdateImageProfileAsync_DoesNotTouchProfileFields_WhenUpdatingCover()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId,
+        var user = CreateUser(id: userId,
                                 profileImageUrl: "https://keep.com/profile.jpg",
                                 profilePublicId: "keep_me");
 
@@ -473,7 +476,7 @@ public class UserServiceTests
 
         // Profile fields untouched
         Assert.Equal("https://keep.com/profile.jpg", user.ProfileImageUrl);
-        Assert.Equal("keep_me",                       user.ProfileImagePublicId);
+        Assert.Equal("keep_me", user.ProfileImagePublicId);
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -496,7 +499,7 @@ public class UserServiceTests
     [Fact]
     public async Task DeleteProfileImageAsync_ClearsProfileFields_AndDeletesFromCloudinary()
     {
-        var userId   = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var publicId = "profile_to_delete";
         var user = CreateUser(id: userId,
                               profileImageUrl: "https://cdn.com/img.jpg",
@@ -519,7 +522,7 @@ public class UserServiceTests
     [Fact]
     public async Task DeleteProfileImageAsync_ClearsCoverFields_AndDeletesFromCloudinary()
     {
-        var userId   = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var publicId = "cover_to_delete";
         var user = CreateUser(id: userId,
                               coverImageUrl: "https://cdn.com/cover.jpg",
@@ -540,7 +543,7 @@ public class UserServiceTests
     public async Task DeleteProfileImageAsync_ReturnsEarly_WhenNoImageExists()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId); // publicId = null
+        var user = CreateUser(id: userId); // publicId = null
 
         _userRepo.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync(user);
 
@@ -555,7 +558,7 @@ public class UserServiceTests
     public async Task DeleteProfileImageAsync_ReturnsEarly_WhenPublicIdIsWhitespace()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId,
+        var user = CreateUser(id: userId,
                                 profileImageUrl: "https://cdn.com/img.jpg",
                                 profilePublicId: "   ");
 
@@ -572,11 +575,11 @@ public class UserServiceTests
     public async Task DeleteProfileImageAsync_DoesNotTouchProfileFields_WhenDeletingCover()
     {
         var userId = Guid.NewGuid();
-        var user   = CreateUser(id: userId,
+        var user = CreateUser(id: userId,
                                 profileImageUrl: "https://cdn.com/profile.jpg",
                                 profilePublicId: "keep_profile",
-                                coverImageUrl:   "https://cdn.com/cover.jpg",
-                                coverPublicId:   "delete_cover");
+                                coverImageUrl: "https://cdn.com/cover.jpg",
+                                coverPublicId: "delete_cover");
 
         _userRepo.Setup(r => r.GetByIdAsync(userId)).ReturnsAsync(user);
         _unitOfWork.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
@@ -585,7 +588,7 @@ public class UserServiceTests
 
         // Profile untouched
         Assert.Equal("https://cdn.com/profile.jpg", user.ProfileImageUrl);
-        Assert.Equal("keep_profile",                 user.ProfileImagePublicId);
+        Assert.Equal("keep_profile", user.ProfileImagePublicId);
 
         // Cover cleared
         Assert.Null(user.CoverImageUrl);
@@ -598,9 +601,9 @@ public class UserServiceTests
     [Fact]
     public async Task DeleteProfileImageAsync_SavesBeforeCloudinaryDelete()
     {
-        var userId   = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var publicId = "order_test_id";
-        var user     = CreateUser(id: userId,
+        var user = CreateUser(id: userId,
                                   profileImageUrl: "https://cdn.com/img.jpg",
                                   profilePublicId: publicId);
 
