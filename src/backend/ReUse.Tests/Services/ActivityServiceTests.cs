@@ -1,6 +1,7 @@
 using AutoMapper;
 
 using Moq;
+
 using ReUse.Application.Exceptions;
 using ReUse.Application.Interfaces;
 using ReUse.Application.Interfaces.Repository;
