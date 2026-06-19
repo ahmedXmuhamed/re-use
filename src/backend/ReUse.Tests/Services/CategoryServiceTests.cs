@@ -126,7 +126,7 @@ public class CategoryServiceTests
                 "Electronics"),
             Times.Once);
     }
-    
+
     [Fact]
     public async Task CreateAsync_DoesNotLogActivity_WhenActorAdminIdIsNull()
     {
@@ -799,7 +799,7 @@ public class CategoryServiceTests
         await _sut.UploadIconAsync(id, CreateFormFile());
 
         _cloudinary.Verify(c => c.DeleteAsync(It.IsAny<string>()), Times.Never);
-        
+
     }
 
     // EDGE CASE — whitespace IconPublicId is treated as "no icon"
