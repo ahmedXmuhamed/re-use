@@ -178,6 +178,9 @@ public class ActivityServiceTests
         Assert.NotNull(result);
         Assert.Equal(3, result.Count);
         Assert.All(result, dto => Assert.Equal(userId, dto.UserId));
+        Assert.Equal("VIEW", result[0].Type);
+        Assert.Equal("FAVORITE", result[1].Type);
+        Assert.Equal("PURCHASE", result[2].Type);
 
         _activityRepo.Verify(r => r.GetByUserIdAsync(userId, 50), Times.Once);
     }
@@ -233,6 +236,9 @@ public class ActivityServiceTests
 
         await Assert.ThrowsAsync<BadRequestException>(
             () => _sut.GetUserActivitiesAsync(userId, 0));
+        _activityRepo.Verify(
+            r => r.GetByUserIdAsync(It.IsAny<Guid>(), It.IsAny<int>()),
+            Times.Never);
     }
 
     // GUARD — negative limit throws BadRequestException
@@ -243,6 +249,9 @@ public class ActivityServiceTests
 
         await Assert.ThrowsAsync<BadRequestException>(
             () => _sut.GetUserActivitiesAsync(userId, -1));
+        _activityRepo.Verify(
+            r => r.GetByUserIdAsync(It.IsAny<Guid>(), It.IsAny<int>()),
+            Times.Never);
     }
 
     // GUARD — limit over 1000 throws BadRequestException
@@ -253,6 +262,9 @@ public class ActivityServiceTests
 
         await Assert.ThrowsAsync<BadRequestException>(
             () => _sut.GetUserActivitiesAsync(userId, 1001));
+        _activityRepo.Verify(
+            r => r.GetByUserIdAsync(It.IsAny<Guid>(), It.IsAny<int>()),
+            Times.Never);
     }
 
     // BOUNDARY — limit of exactly 1 is valid (lower boundary)
